@@ -1,0 +1,123 @@
+<!DOCTYPE html> 
+
+<script>
+  const runFunnelAction = (action, redirect) => {
+    const window_url_string = window.location.href;
+    const window_url = new URL(window_url_string);
+    let lead_id = window_url.searchParams.get("lead_id") || window_url.searchParams.get("xcod");
+
+    let update_lead_url = null;
+
+    if (lead_id !== undefined && lead_id !== null) {
+      if (lead_id.indexOf("/") >= 0) lead_id = lead_id.split("/")[2];
+      update_lead_url = "https://core.myedools.com/funnels/177936/stages/621509/lead_stages/update_lead_status?lead_action=" + action + "&lead_id=" + lead_id;
+    } else {
+      update_lead_url = "https://core.myedools.com/funnels/177936/stages/621509/lead_stages/update_lead_status?lead_action=skip";
+    }
+
+    fetch(update_lead_url, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      }
+    }).then((resp) => {
+      return resp.json();
+    }).then((body) => {
+      if (redirect) {
+        window.location = body.next_url;
+      } else {
+        console.log(body);
+      }
+    }).catch((error) => {
+      console.error(error);
+    });
+  };
+
+  runFunnelAction("capture", false);
+</script>
+
+<script>
+  function setCaptureForm () {
+    const forms = document.getElementsByTagName("form");
+    Array.from(forms).forEach(form => {
+      form.onsubmit = function (ev) {
+        ev.preventDefault();
+        const update_lead_url = "https://core.myedools.com/funnels/177936/stages/621509/lead_stages/update_lead_status?lead_action=capture";
+        const body_params = {};
+        const inputs = ev.target.getElementsByTagName("input");
+        body_params["email"] = inputs.namedItem("email").value;
+        if (inputs.namedItem("name"))
+          body_params["name"] = inputs.namedItem("name").value;
+        if (inputs.namedItem("phone"))
+          body_params["phone"] = inputs.namedItem("phone").value;
+        fetch(update_lead_url, {
+          method: "POST",
+          body: JSON.stringify(body_params),
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          }
+        }).then((resp) => {
+          return resp.json();
+        }).then((body) => {
+          console.log(body);
+          window.location = body.next_url;
+        }).catch((error) => {
+          console.error(error);
+        });
+      };
+    });
+  }
+  setCaptureForm();
+</script>
+
+<script>
+  function setCaptureOnClickCTAButton () {
+    const runFunnelAction = (action, redirect) => {
+      const window_url_string = window.location.href;
+      const window_url = new URL(window_url_string);
+      let lead_id = window_url.searchParams.get("lead_id") || window_url.searchParams.get("xcod");
+
+      let update_lead_url = null;
+
+      if (lead_id !== undefined && lead_id !== null) {
+        if (lead_id.indexOf("/") >= 0) lead_id = lead_id.split("/")[2];
+        update_lead_url = "https://core.myedools.com/funnels/177936/stages/621509/lead_stages/update_lead_status?lead_action=" + action + "&lead_id=" + lead_id;
+      } else {
+        update_lead_url = "https://core.myedools.com/funnels/177936/stages/621509/lead_stages/update_lead_status?lead_action=skip";
+      }
+
+      if (update_lead_url !== null) {
+        fetch(update_lead_url, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          }
+        }).then((resp) => {
+          return resp.json();
+        }).then((body) => {
+          if (redirect) {
+            window.location = body.next_url;
+          } else {
+            console.log(body);
+          }
+        }).catch((error) => {
+          console.error(error);
+        });
+      }
+    }
+
+    const buttons = document.querySelectorAll(".pages-cta-button");
+    Array.from(buttons).forEach(button => {
+      button.onclick = function (ev) {
+        ev.preventDefault();
+        runFunnelAction("capture", true);
+      }
+    });
+  }
+  setCaptureOnClickCTAButton();
+</script>
+
+</html>
